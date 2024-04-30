@@ -20,7 +20,7 @@ M.on_attach = function(event)
 
   -- Jump to the implementation of the word under your cursor.
   --  Useful when your language has ways of declaring types without an actual implementation.
-  map('gI', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
+  map('gi', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
 
   -- Jump to the type of the word under your cursor.
   --  Useful when you're not sure what type a variable is and you want to see
