@@ -554,6 +554,23 @@ require('lazy').setup({
             },
           },
         },
+        volar = {},
+        tsserver = {
+          init_options = {
+            plugins = {
+              {
+                name = '@vue/typescript-plugin',
+                location = '/home/jona/.local/lib/node_modules/@vue/typescript-plugin',
+                languages = { 'javascript', 'typescript', 'vue' },
+              },
+            },
+          },
+          filetypes = {
+            'javascript',
+            'typescript',
+            'vue',
+          },
+        },
       }
 
       -- Ensure the servers and tools above are installed
@@ -803,7 +820,7 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     opts = {
-      ensure_installed = { 'bash', 'c', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc', 'typescript', 'vue' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
