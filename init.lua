@@ -381,6 +381,14 @@ require('lazy').setup({
           path_display = { 'smart' },
           color_devicons = true,
           set_env = { ['COLORTERM'] = 'truecolor' }, -- default = nil,
+          mappings = {
+            i = {
+              ['<CR>'] = require('telescope.actions').select_default,
+            },
+            n = {
+              ['<CR>'] = require('telescope.actions').select_default,
+            },
+          },
         },
         -- pickers = {}
         extensions = {
@@ -403,7 +411,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>fk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
 
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
-      vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '[F]earch [F]iles' })
       vim.keymap.set('n', '<c-p>', builtin.find_files, { desc = '[S]earch [F]iles' })
 
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
