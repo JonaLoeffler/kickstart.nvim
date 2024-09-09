@@ -481,7 +481,7 @@ require('lazy').setup({
 
       -- `neodev` configures Lua LSP for your Neovim config, runtime and plugins
       -- used for completion, annotations and signatures of Neovim apis
-      { 'folke/neodev.nvim', opts = {} },
+      -- { 'folke/neodev.nvim', opts = {} },
       'SmiteshP/nvim-navic',
       -- Allows extra capabilities provided by nvim-cmp
       'hrsh7th/cmp-nvim-lsp',
@@ -572,14 +572,13 @@ require('lazy').setup({
               {
                 name = '@vue/typescript-plugin',
                 location = '/home/jona/.local/lib/node_modules/@vue/typescript-plugin',
-                languages = { 'javascript', 'typescript', 'vue' },
+                languages = { 'javascript', 'typescript' },
               },
             },
           },
           filetypes = {
             'javascript',
             'typescript',
-            'vue',
           },
         },
       }
