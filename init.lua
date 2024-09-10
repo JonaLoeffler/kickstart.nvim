@@ -598,19 +598,20 @@ require('lazy').setup({
           },
         },
         volar = {},
-        tsserver = {
+        ts_ls = {
           init_options = {
             plugins = {
               {
                 name = '@vue/typescript-plugin',
                 location = '/home/jona/.local/lib/node_modules/@vue/typescript-plugin',
-                languages = { 'javascript', 'typescript' },
+                languages = { 'javascript', 'typescript', 'vue' },
               },
             },
           },
           filetypes = {
             'javascript',
             'typescript',
+            'vue',
           },
         },
       }
