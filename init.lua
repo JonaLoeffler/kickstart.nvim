@@ -614,6 +614,7 @@ require('lazy').setup({
             'vue',
           },
         },
+        kotlin_language_server = {},
       }
 
       -- Ensure the servers and tools above are installed
