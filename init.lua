@@ -598,6 +598,9 @@ require('lazy').setup({
           },
         },
         volar = {},
+        denols = {
+          root_dir = require('lspconfig').util.root_pattern('deno.json', 'deno.jsonc'),
+        },
         ts_ls = {
           init_options = {
             plugins = {
@@ -613,8 +616,12 @@ require('lazy').setup({
             'typescript',
             'vue',
           },
+          root_dir = require('lspconfig').util.root_pattern 'package.json',
+          single_file_support = false,
         },
-        kotlin_language_server = {},
+        kotlin_language_server = {
+          root_dir = require('lspconfig').util.root_pattern '.git',
+        },
       }
 
       -- Ensure the servers and tools above are installed
@@ -672,8 +679,10 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true, java = true, typescript = true, javascript = true, vue = true }
+        local disable_filetypes = { c = true, cpp = true, java = true, typescript = true, javascript = true, vue = true, kotlin = true }
+
         local lsp_format_opt
+
         if disable_filetypes[vim.bo[bufnr].filetype] then
           lsp_format_opt = 'never'
         else
@@ -944,6 +953,7 @@ require('lazy').setup({
 })
 
 require('lvim.breadcrumbs').setup()
+require('jona.ktlint').setup()
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

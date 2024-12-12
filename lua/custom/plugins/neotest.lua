@@ -92,4 +92,60 @@ return {
       keymaps()
     end,
   },
+  -- {
+  --   'codymikol/neotest-kotlin',
+  --   ft = 'kotlin',
+  --   dependencies = {
+  --     'nvim-neotest/neotest',
+  --     dependencies = {
+  --       'nvim-neotest/nvim-nio',
+  --       'nvim-lua/plenary.nvim',
+  --       'antoinemadec/FixCursorHold.nvim',
+  --       'nvim-treesitter/nvim-treesitter',
+  --     },
+  --   },
+  --   config = function()
+  --     require('neotest').setup {
+  --       adapters = {
+  --         require 'codymikol/neotest-kotlin',
+  --       },
+  --       output = { open_on_run = true },
+  --       quickfix = {
+  --         open = function()
+  --           vim.cmd 'copen'
+  --         end,
+  --       },
+  --     }
+  --
+  --     keymaps()
+  --   end,
+  -- },
+  {
+    'weilbith/neotest-gradle',
+    ft = 'kotlin',
+    dependencies = {
+      'nvim-neotest/neotest',
+      dependencies = {
+        'nvim-neotest/nvim-nio',
+        'nvim-lua/plenary.nvim',
+        'antoinemadec/FixCursorHold.nvim',
+        'nvim-treesitter/nvim-treesitter',
+      },
+    },
+    config = function()
+      require('neotest').setup {
+        adapters = {
+          require 'neotest-gradle',
+        },
+        output = { open_on_run = true },
+        quickfix = {
+          open = function()
+            vim.cmd 'copen'
+          end,
+        },
+      }
+
+      keymaps()
+    end,
+  },
 }
