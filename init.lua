@@ -185,7 +185,7 @@ vim.keymap.set('n', '<C-k>', ':cprev<CR>')
 vim.keymap.set('n', '<leader>qo', ':lopen<CR>')
 vim.keymap.set('n', '<leader>qq', ':lclose<CR>')
 vim.keymap.set('n', '<C-n>', ':lnext<CR>')
-vim.keymap.set('n', '<C-m>', ':lprev<CR>')
+vim.keymap.set('n', '<C-p>', ':lprev<CR>')
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -209,6 +209,9 @@ vim.keymap.set('n', '<leader>h', '<C-w><C-h>', { desc = 'Move focus to the left 
 vim.keymap.set('n', '<leader>l', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<leader>j', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<leader>k', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+
+vim.keymap.set('n', 'gh', '^', { desc = 'Move to the first non-blank character of the line' })
+vim.keymap.set('n', 'gl', '$', { desc = 'Move to the last non-blank character of the line' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -235,6 +238,7 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
   end
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
+vim.opt.rtp:prepend '/opt/homebrew/opt/fzf'
 
 -- [[ Configure and install plugins ]]
 --
@@ -441,7 +445,7 @@ require('lazy').setup({
 
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '[F]earch [F]iles' })
-      vim.keymap.set('n', '<c-p>', builtin.find_files, { desc = '[S]earch [F]iles' })
+      -- vim.keymap.set('n', '<c-p>', builtin.find_files, { desc = '[S]earch [F]iles' })
 
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>fi', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
