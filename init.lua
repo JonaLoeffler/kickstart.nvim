@@ -158,6 +158,7 @@ vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
+vim.opt.scroll = 20
 vim.opt.wrap = false -- no line wraps
 
 vim.opt.guifont = 'Fira Code:h12'
@@ -210,8 +211,8 @@ vim.keymap.set('n', '<leader>l', '<C-w><C-l>', { desc = 'Move focus to the right
 vim.keymap.set('n', '<leader>j', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<leader>k', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
-vim.keymap.set('n', 'gh', '^', { desc = 'Move to the first non-blank character of the line' })
-vim.keymap.set('n', 'gl', '$', { desc = 'Move to the last non-blank character of the line' })
+vim.keymap.set('', 'gh', '^', { desc = 'Move to the first non-blank character of the line' })
+vim.keymap.set('', 'gl', '$', { desc = 'Move to the last non-blank character of the line' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
