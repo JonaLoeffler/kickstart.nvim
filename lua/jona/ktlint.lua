@@ -21,11 +21,11 @@ M.setup = function()
   end
 
   -- Set up autocommand to format on save
-  vim.api.nvim_create_autocmd({ 'BufWritePost' }, {
-    group = vim.api.nvim_create_augroup('FormatWithKtlint', {}),
-    pattern = { '*.kt', '*.kts' },
-    command = ':silent! :!ktlint -F %',
-  })
+  -- vim.api.nvim_create_autocmd({ 'BufWritePost' }, {
+  --   group = vim.api.nvim_create_augroup('FormatWithKtlint', {}),
+  --   pattern = { '*.kt', '*.kts' },
+  --   command = ':silent! :!ktlint -F %',
+  -- })
 
   -- Add a command to manually trigger formatting
   vim.api.nvim_create_user_command('FormatWithKtlint', run_ktlint, {})
