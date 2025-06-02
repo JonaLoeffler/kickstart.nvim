@@ -653,9 +653,9 @@ require('lazy').setup({
             },
           },
         },
-        volar = {},
+        -- volar = {},
         denols = {
-          root_dir = require('lspconfig').util.root_pattern('deno.json', 'deno.jsonc'),
+          -- root_dir = require('lspconfig').util.root_pattern('deno.json', 'deno.jsonc'),
         },
         ts_ls = {
           init_options = {
@@ -675,8 +675,9 @@ require('lazy').setup({
           root_dir = require('lspconfig').util.root_pattern 'package.json',
           single_file_support = false,
         },
-        kotlin_language_server = {
-          root_dir = require('lspconfig').util.root_pattern '.git',
+        yamlls = {},
+        kotlin_lsp = {
+          root_markers = { '.git', 'gradlew' },
         },
       }
 
