@@ -23,12 +23,12 @@ M.on_attach = function(event)
 
   -- Find references for the word under your cursor.
   map('gr', vim.lsp.buf.references, '[G]oto [R]eferences')
-  map('grr', vim.lsp.buf.references, '[G]oto [R]eferences')
+  map('grr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
 
   -- Jump to the implementation of the word under your cursor.
   --  Useful when your language has ways of declaring types without an actual implementation.
   map('gi', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
-  map('gri', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
+  map('gri', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
 
   -- Jump to the definition of the word under your cursor.
   --  This is where a variable was first declared, or where a function is defined, etc.
@@ -48,6 +48,7 @@ M.on_attach = function(event)
   -- Fuzzy find all the symbols in your current workspace.
   --  Similar to document symbols, except searches over your entire project.
   map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Open Workspace Symbols')
+  map('gW', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Open Workspace Symbols')
 
   -- Jump to the type of the word under your cursor.
   --  Useful when you're not sure what type a variable is and you want to see
