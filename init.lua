@@ -299,9 +299,6 @@ require('lazy').setup({
     'lewis6991/gitsigns.nvim',
     opts = {
       current_line_blame = true,
-      yadm = {
-        enable = true,
-      },
       signs = {
         add = { text = '+' },
         change = { text = '~' },
@@ -677,9 +674,9 @@ require('lazy').setup({
           single_file_support = false,
         },
         yamlls = {},
-        kotlin_lsp = {
-          root_markers = { '.git', 'gradlew' },
-        },
+        -- kotlin_lsp = {
+        --   root_markers = { '.git', 'gradlew' },
+        -- },
       }
 
       -- Ensure the servers and tools above are installed
@@ -701,6 +698,10 @@ require('lazy').setup({
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
+      vim.lsp.config('kotlin_lsp', {
+        root_markers = { '.git', 'gradlew' },
+      })
+
       require('mason-lspconfig').setup {
         ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
         automatic_installation = false,
@@ -715,7 +716,7 @@ require('lazy').setup({
               return
             end
 
-            require('lspconfig')[server_name].setup(server)
+            require('lspconfig')[server_name].enable(server)
           end,
         },
       }

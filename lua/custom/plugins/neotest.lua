@@ -50,8 +50,9 @@ return {
         adapters = {
           require 'neotest-vitest',
         },
-        output = { open_on_run = true },
+        output = { enabled = true, open_on_run = true },
         quickfix = {
+          enabled = true,
           open = function()
             vim.cmd 'copen'
           end,
@@ -81,8 +82,9 @@ return {
             ignore_wrapper = false, -- whether to ignore maven/gradle wrapper
           },
         },
-        output = { open_on_run = true },
+        output = { enabled = true, open_on_run = true },
         quickfix = {
+          enabled = true,
           open = function()
             vim.cmd 'copen'
           end,
@@ -110,8 +112,9 @@ return {
         adapters = {
           require 'neotest-kotest',
         },
-        output = { open_on_run = true },
+        output = { enabled = true, open_on_run = true },
         quickfix = {
+          enabled = true,
           open = function()
             vim.cmd 'copen'
           end,
