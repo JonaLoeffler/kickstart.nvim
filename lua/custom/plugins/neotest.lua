@@ -96,7 +96,6 @@ return {
   },
   {
     'codymikol/neotest-kotlin',
-    dev = true,
     ft = 'kotlin',
     dependencies = {
       'nvim-neotest/neotest',
@@ -110,7 +109,7 @@ return {
     config = function()
       require('neotest').setup {
         adapters = {
-          require 'neotest-kotest',
+          require 'neotest-kotlin',
         },
         output = { enabled = true, open_on_run = true },
         quickfix = {
