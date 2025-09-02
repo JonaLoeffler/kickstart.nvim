@@ -12,6 +12,7 @@ return {
     vim.keymap.set('n', '-', open, opts 'Open and find file')
   end,
   opts = {
+    view = { relativenumber = true },
     renderer = {
       group_empty = true,
     },

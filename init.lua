@@ -852,7 +852,7 @@ require('lazy').setup({
       {
         '<leader>f',
         function()
-          require('conform').format { async = true, lsp_format = 'fallback' }
+          require('conform').format { async = true, lsp_format = 'first' }
         end,
         mode = '',
         desc = '[F]ormat buffer',
@@ -1123,7 +1123,7 @@ require('lazy').setup({
 })
 
 require('lvim.breadcrumbs').setup()
-require('jona.ktlint').setup()
+-- require('jona.ktlint').setup()
 
 vim.api.nvim_create_autocmd({ 'FileType' }, {
   callback = function()
