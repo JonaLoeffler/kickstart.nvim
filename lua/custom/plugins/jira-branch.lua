@@ -40,14 +40,11 @@ local M = {}
 -- ============================================================================
 -- CONFIGURATION - Update this with your email
 -- ============================================================================
-local JIRA_EMAIL = 'jona.loeffler@leanix.net'
+local JIRA_EMAIL = os.getenv('JIRA_EMAIL')
 
 -- Function to fetch Jira tickets
 local function fetch_jira_tickets()
-  local cmd = string.format(
-    'jira issue list --plain --no-headers --columns key,summary -s~Done -s~Rejected -a"%s"',
-    JIRA_EMAIL
-  )
+  local cmd = string.format('jira issue list --plain --no-headers --columns key,summary -s~Done -s~Rejected -a"%s"', JIRA_EMAIL)
 
   local handle = io.popen(cmd)
   if not handle then
@@ -99,13 +96,13 @@ end
 local function create_git_branch(ticket_key, branch_description, ticket_summary)
   -- Use the provided description, or fall back to the ticket summary if empty
   local description_to_use = (branch_description and branch_description ~= '') and branch_description or ticket_summary
-  
+
   -- Slugify the description
   local slugified_description = slugify(description_to_use)
-  
+
   -- Construct branch name: feature/ECO-123-slugified-description
   local branch_name = string.format('feature/%s-%s', ticket_key, slugified_description)
-  
+
   -- Use git checkout -b to create and immediately checkout the branch
   local cmd = string.format('git checkout -b %s', branch_name)
   vim.notify('Creating and checking out branch: ' .. branch_name, vim.log.levels.INFO)
@@ -117,14 +114,29 @@ local function create_git_branch(ticket_key, branch_description, ticket_summary)
   end
 
   local output = handle:read '*a'
-  local success = handle:close()
 
-  if success then
+  -- handle:close() returns: true on success, or nil, "exit", exit_code on failure
+  -- We need to check explicitly for true to ensure success
+  local ok, exit_type, exit_code = handle:close()
+
+  -- Check if the command succeeded (ok == true or exit_code == 0)
+  local success = (ok == true) or (exit_type == 'exit' and exit_code == 0)
+
+  local error_message = output:find 'fatal:' or output:find 'Schwerwiegend'
+
+  if success and not error_message then
     vim.notify('✓ Branch created and checked out: ' .. branch_name, vim.log.levels.INFO)
     -- Refresh git status in any open git plugins
-    vim.cmd('checktime')
+    vim.cmd 'checktime'
   else
-    vim.notify('Failed to create branch:\n' .. output, vim.log.levels.ERROR)
+    local error_msg = 'Failed to create branch'
+    if exit_code then
+      error_msg = error_msg .. ' (exit code: ' .. exit_code .. ')'
+    end
+    if output and output ~= '' then
+      error_msg = error_msg .. ':\n' .. output
+    end
+    vim.notify(error_msg, vim.log.levels.ERROR)
   end
 end
 
@@ -202,4 +214,3 @@ return {
     },
   },
 }
-
