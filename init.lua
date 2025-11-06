@@ -773,9 +773,10 @@ require('lazy').setup({
           },
         },
         -- volar = {},
-        denols = {
-          -- root_dir = require('lspconfig').util.root_pattern('deno.json', 'deno.jsonc'),
-        },
+        -- denols = {
+        -- root_dir = require('lspconfig').util.root_pattern('deno.json', 'deno.jsonc'),
+        -- },
+        angularls = {},
         ts_ls = {
           init_options = {
             plugins = {

@@ -96,7 +96,8 @@ return {
   },
   {
     'codymikol/neotest-kotlin',
-    dev = true,
+    branch = 'v2.0.0',
+    -- dev = true,
     ft = 'kotlin',
     dependencies = {
       'nvim-neotest/neotest',
