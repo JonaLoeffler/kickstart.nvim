@@ -1045,6 +1045,31 @@ require('lazy').setup({
         return '%2l:%-2v'
       end
 
+      -- Add macro recording status to the statusline
+      -- Save the original section_mode function
+      local orig_section_mode = statusline.section_mode
+      ---@diagnostic disable-next-line: duplicate-set-field
+      statusline.section_mode = function(args)
+        local mode_str, mode_hl = orig_section_mode(args)
+        local recording_register = vim.fn.reg_recording()
+        if recording_register ~= '' then
+          return mode_str .. ' %* Recording @' .. recording_register, mode_hl
+        end
+        return mode_str, mode_hl
+      end
+
+      -- Auto-refresh statusline when recording status changes
+      vim.api.nvim_create_autocmd('RecordingEnter', {
+        callback = function()
+          vim.cmd 'redrawstatus'
+        end,
+      })
+      vim.api.nvim_create_autocmd('RecordingLeave', {
+        callback = function()
+          vim.cmd 'redrawstatus'
+        end,
+      })
+
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
