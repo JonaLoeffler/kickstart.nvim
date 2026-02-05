@@ -799,9 +799,6 @@ require('lazy').setup({
         -- kotlin_lsp = {
         --   root_markers = { '.git', 'gradlew' },
         -- },
-        kotlin_language_server = {
-          root_dir = require('lspconfig').util.root_pattern '.git',
-        },
         intelephense = {},
       }
 
@@ -1084,7 +1081,7 @@ require('lazy').setup({
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
+    main = 'nvim-treesitter.config', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
       ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'typescript', 'vue' },
@@ -1153,21 +1150,27 @@ require('lazy').setup({
       lazy = '💤 ',
     },
   },
+  dev = {
+    -- Directory where you store your local plugin projects. If a function is used,
+    -- the plugin directory (e.g. `~/projects/plugin-name`) must be returned.
+    ---@type string | fun(plugin: LazyPlugin): string
+    path = '~/Code',
+  },
 })
 
 require('lvim.breadcrumbs').setup()
 -- require('jona.ktlint').setup()
 
-vim.api.nvim_create_autocmd({ 'FileType' }, {
-  callback = function()
-    if require('nvim-treesitter.parsers').has_parser() then
-      vim.o.foldmethod = 'expr'
-      vim.o.foldexpr = 'nvim_treesitter#foldexpr()'
-    else
-      vim.o.foldmethod = 'syntax'
-    end
-  end,
-})
+-- vim.api.nvim_create_autocmd({ 'FileType' }, {
+--   callback = function()
+--     if require('nvim-treesitter.parsers').has_parser() then
+--       vim.o.foldmethod = 'expr'
+--       vim.o.foldexpr = 'nvim_treesitter#foldexpr()'
+--     else
+--       vim.o.foldmethod = 'syntax'
+--     end
+--   end,
+-- })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

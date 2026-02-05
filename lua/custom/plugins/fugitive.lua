@@ -8,5 +8,7 @@ return {
     vim.keymap.set('n', '<leader>gd', ':Git difftool<CR>')
     vim.keymap.set('n', '<leader>gs', ':Gvdiffsplit<CR>')
     vim.keymap.set('n', '<leader>gx', ':Git mergetool<CR>')
+
+    vim.keymap.set('n', '<leader>gw', ':!gh pr create --web')
   end,
 }

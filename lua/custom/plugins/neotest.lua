@@ -34,83 +34,25 @@ end
 
 return {
   {
-    'marilari88/neotest-vitest',
-    ft = 'typescript',
+    'nvim-neotest/neotest',
+    ft = { 'typescript', 'java', 'kotlin' },
     dependencies = {
-      'nvim-neotest/neotest',
-      dependencies = {
-        'nvim-neotest/nvim-nio',
-        'nvim-lua/plenary.nvim',
-        'antoinemadec/FixCursorHold.nvim',
-        'nvim-treesitter/nvim-treesitter',
-      },
+      'nvim-neotest/nvim-nio',
+      'nvim-lua/plenary.nvim',
+      'antoinemadec/FixCursorHold.nvim',
+      'nvim-treesitter/nvim-treesitter',
+      -- Adapters
+      'marilari88/neotest-vitest',
+      { 'rcasia/neotest-java', tag = 'v0.10.0' },
+      { 'codymikol/neotest-kotlin', branch = 'v2.0.0' },
     },
     config = function()
       require('neotest').setup {
         adapters = {
           require 'neotest-vitest',
-        },
-        output = { enabled = true, open_on_run = true },
-        quickfix = {
-          enabled = true,
-          open = function()
-            vim.cmd 'copen'
-          end,
-        },
-      }
-
-      keymaps()
-    end,
-  },
-  {
-    'rcasia/neotest-java',
-    tag = 'v0.10.0',
-    ft = 'java',
-    dependencies = {
-      'nvim-neotest/neotest',
-      dependencies = {
-        'nvim-neotest/nvim-nio',
-        'nvim-lua/plenary.nvim',
-        'antoinemadec/FixCursorHold.nvim',
-        'nvim-treesitter/nvim-treesitter',
-      },
-    },
-    config = function()
-      require('neotest').setup {
-        adapters = {
           require 'neotest-java' {
-            ignore_wrapper = false, -- whether to ignore maven/gradle wrapper
+            ignore_wrapper = false,
           },
-        },
-        output = { enabled = true, open_on_run = true },
-        quickfix = {
-          enabled = true,
-          open = function()
-            vim.cmd 'copen'
-          end,
-        },
-      }
-
-      keymaps()
-    end,
-  },
-  {
-    'codymikol/neotest-kotlin',
-    branch = 'v2.0.0',
-    -- dev = true,
-    ft = 'kotlin',
-    dependencies = {
-      'nvim-neotest/neotest',
-      dependencies = {
-        'nvim-neotest/nvim-nio',
-        'nvim-lua/plenary.nvim',
-        'antoinemadec/FixCursorHold.nvim',
-        'nvim-treesitter/nvim-treesitter',
-      },
-    },
-    config = function()
-      require('neotest').setup {
-        adapters = {
           require 'neotest-kotlin',
         },
         output = { enabled = true, open_on_run = true },
