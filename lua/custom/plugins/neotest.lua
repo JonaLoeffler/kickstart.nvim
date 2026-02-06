@@ -45,6 +45,7 @@ return {
       'marilari88/neotest-vitest',
       { 'rcasia/neotest-java', tag = 'v0.10.0' },
       { 'codymikol/neotest-kotlin', branch = 'v2.0.0' },
+      -- { dir = '~/Code/neotest-kotlin' },
     },
     config = function()
       require('neotest').setup {
