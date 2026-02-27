@@ -44,7 +44,7 @@ local JIRA_EMAIL = os.getenv('JIRA_EMAIL')
 
 -- Function to fetch Jira tickets
 local function fetch_jira_tickets()
-  local cmd = string.format('jira issue list --plain --no-headers --columns key,summary -s~Done -s~Rejected -a"%s"', JIRA_EMAIL)
+  local cmd = string.format('jira issue list --plain --no-headers --columns key,summary -s~Done -s~Rejected -t~Epic -a"%s"', JIRA_EMAIL)
 
   local handle = io.popen(cmd)
   if not handle then
