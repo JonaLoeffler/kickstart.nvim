@@ -92,18 +92,22 @@ local function slugify(text)
   return text
 end
 
--- Function to create and checkout branch
-local function create_git_branch(ticket_key, branch_description, ticket_summary)
-  -- Use the provided description, or fall back to the ticket summary if empty
+local function build_branch_name(ticket_key, branch_description, ticket_summary)
   local description_to_use = (branch_description and branch_description ~= '') and branch_description or ticket_summary
+  return string.format('feature/%s-%s', ticket_key, slugify(description_to_use))
+end
 
-  -- Slugify the description
-  local slugified_description = slugify(description_to_use)
+local function get_repo_root()
+  local handle = io.popen('git rev-parse --path-format=absolute --git-common-dir 2>/dev/null')
+  if not handle then return nil end
+  local git_dir = handle:read '*l'
+  handle:close()
+  if not git_dir or git_dir == '' then return nil end
+  return git_dir:match('^(.+)/.git$')
+end
 
-  -- Construct branch name: feature/ECO-123-slugified-description
-  local branch_name = string.format('feature/%s-%s', ticket_key, slugified_description)
-
-  -- Use git checkout -b to create and immediately checkout the branch
+local function create_git_branch(ticket_key, branch_description, ticket_summary)
+  local branch_name = build_branch_name(ticket_key, branch_description, ticket_summary)
   local cmd = string.format('git checkout -b %s', branch_name)
   vim.notify('Creating and checking out branch: ' .. branch_name, vim.log.levels.INFO)
 
@@ -140,15 +144,58 @@ local function create_git_branch(ticket_key, branch_description, ticket_summary)
   end
 end
 
--- Main function to create branch from Jira ticket
+local function create_git_worktree(ticket_key, branch_description, ticket_summary)
+  local git_root = get_repo_root()
+  if not git_root then
+    vim.notify('Failed to determine git repository root', vim.log.levels.ERROR)
+    return
+  end
+
+  local branch_name = build_branch_name(ticket_key, branch_description, ticket_summary)
+  local dir_name = branch_name:match('^feature/(.+)$') or branch_name
+  local worktree_path = git_root .. '/worktrees/' .. dir_name
+
+  local cmd = string.format('git worktree add "%s" -b %s 2>&1', worktree_path, branch_name)
+  vim.notify('Creating worktree: ' .. worktree_path, vim.log.levels.INFO)
+
+  local handle = io.popen(cmd)
+  if not handle then
+    vim.notify('Failed to create worktree', vim.log.levels.ERROR)
+    return
+  end
+
+  local output = handle:read '*a'
+  local ok, exit_type, exit_code = handle:close()
+  local success = (ok == true) or (exit_type == 'exit' and exit_code == 0)
+  local error_message = output:find 'fatal:' or output:find 'Schwerwiegend'
+
+  if success and not error_message then
+    local dev_output = vim.fn.system(string.format('dev "%s"', worktree_path))
+    local session = vim.trim(dev_output:match('^([^\n]+)') or '')
+    vim.notify('Worktree ready. Switch to tmux session: ' .. session, vim.log.levels.INFO)
+  else
+    local error_msg = 'Failed to create worktree'
+    if exit_code then
+      error_msg = error_msg .. ' (exit code: ' .. exit_code .. ')'
+    end
+    if output and output ~= '' then
+      error_msg = error_msg .. ':\n' .. output
+    end
+    vim.notify(error_msg, vim.log.levels.ERROR)
+  end
+end
+
+local branch_actions = {
+  { label = 'Checkout branch', fn = create_git_branch },
+  { label = 'Create worktree', fn = create_git_worktree },
+}
+
 function M.create_branch_from_jira()
-  -- Fetch tickets
   local tickets = fetch_jira_tickets()
   if not tickets or #tickets == 0 then
     return
   end
 
-  -- Use Telescope to pick a ticket
   local pickers = require 'telescope.pickers'
   local finders = require 'telescope.finders'
   local actions = require 'telescope.actions'
@@ -182,13 +229,25 @@ function M.create_branch_from_jira()
           local ticket_key = selection.value
           local ticket_summary = selection.ticket.summary
 
-          -- Prompt for branch name
           vim.ui.input({
             prompt = 'Enter branch description (empty to use ticket summary): ',
             default = '',
           }, function(branch_description)
-            -- Always create branch, using ticket summary if description is empty
-            create_git_branch(ticket_key, branch_description, ticket_summary)
+            if branch_description == nil then return end
+
+            vim.ui.select(
+              vim.tbl_map(function(a) return a.label end, branch_actions),
+              { prompt = 'Select action:' },
+              function(choice)
+                if not choice then return end
+                for _, a in ipairs(branch_actions) do
+                  if a.label == choice then
+                    a.fn(ticket_key, branch_description, ticket_summary)
+                    return
+                  end
+                end
+              end
+            )
           end)
         end)
         return true
