@@ -11,8 +11,8 @@
   - Immediately checks out the new branch
   
   Requirements:
-  1. The 'jira' CLI tool must be installed and configured
-     (https://github.com/ankitpokhrel/jira-cli)
+  1. The official Atlassian CLI ('acli') must be installed and authenticated
+     (https://developer.atlassian.com/cloud/acli/guides/introduction/)
   2. Git must be available in your PATH
   
   Configuration:
@@ -44,7 +44,11 @@ local JIRA_EMAIL = os.getenv('JIRA_EMAIL')
 
 -- Function to fetch Jira tickets
 local function fetch_jira_tickets()
-  local cmd = string.format('jira issue list --plain --no-headers --columns key,summary -s~Done -s~Rejected -t~Epic -a"%s"', JIRA_EMAIL)
+  local jql = string.format(
+    'assignee = "%s" AND statusCategory != Done AND status != Rejected AND issuetype != Epic ORDER BY updated DESC',
+    JIRA_EMAIL
+  )
+  local cmd = string.format('acli jira workitem search --jql %q --fields "key,summary" --csv', jql)
 
   local handle = io.popen(cmd)
   if not handle then
@@ -60,17 +64,22 @@ local function fetch_jira_tickets()
     return nil
   end
 
-  -- Parse the output into a table of tickets
+  -- Parse CSV output (skip header row): KEY,SUMMARY
   local tickets = {}
+  local first = true
   for line in result:gmatch '[^\r\n]+' do
-    -- Match pattern: KEY<whitespace>SUMMARY
-    local key, summary = line:match '^([A-Z]+-[0-9]+)%s+(.+)$'
-    if key and summary then
-      table.insert(tickets, {
-        key = key,
-        summary = summary,
-        display = key .. ': ' .. summary,
-      })
+    if first then
+      first = false
+    else
+      local key, summary = line:match '^([A-Z]+-[0-9]+),(.+)$'
+      if key and summary then
+        summary = summary:match '^"(.*)"$' or summary
+        table.insert(tickets, {
+          key = key,
+          summary = summary,
+          display = key .. ': ' .. summary,
+        })
+      end
     end
   end
 
