@@ -90,6 +90,8 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+vim.loader.enable()
+
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
@@ -188,13 +190,13 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 
 vim.keymap.set('n', '<leader>co', ':copen<CR>')
 vim.keymap.set('n', '<leader>cc', ':cclose<CR>')
-vim.keymap.set('n', '<C-j>', ':cnext<CR>')
-vim.keymap.set('n', '<C-k>', ':cprev<CR>')
+vim.keymap.set('n', '<C-n>', ':cnext<CR>')
+vim.keymap.set('n', '<C-p>', ':cprev<CR>')
 
 vim.keymap.set('n', '<leader>qo', ':lopen<CR>')
 vim.keymap.set('n', '<leader>qq', ':lclose<CR>')
-vim.keymap.set('n', '<C-n>', ':lnext<CR>')
-vim.keymap.set('n', '<C-p>', ':lprev<CR>')
+vim.keymap.set('n', '<leader>j', ':lnext<CR>')
+vim.keymap.set('n', '<leader>k', ':lprev<CR>')
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -214,10 +216,10 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 --  Use CTRL+<hjkl> to switch between windows
 --
 --  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<leader>h', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<leader>l', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<leader>j', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<leader>k', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 vim.keymap.set('', 'gh', '^', { desc = 'Move to the first non-blank character of the line' })
 vim.keymap.set('', 'gl', '$', { desc = 'Move to the last non-blank character of the line' })
@@ -403,7 +405,7 @@ require('lazy').setup({
       { 'nvim-telescope/telescope-ui-select.nvim' },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
-      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+      { 'echasnovski/mini.icons', enabled = vim.g.have_nerd_font },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -702,9 +704,19 @@ require('lazy').setup({
       -- Diagnostic Config
       -- See :help vim.diagnostic.Opts
       vim.diagnostic.config {
+        update_in_insert = false,
         severity_sort = true,
         float = { border = 'rounded', source = 'if_many' },
-        underline = { severity = vim.diagnostic.severity.ERROR },
+        underline = { severity = { min = vim.diagnostic.severity.WARN } },
+        jump = {
+          on_jump = function(_, bufnr)
+            vim.diagnostic.open_float {
+              bufnr = bufnr,
+              scope = 'cursor',
+              focus = false,
+            }
+          end,
+        },
         signs = vim.g.have_nerd_font and {
           text = {
             [vim.diagnostic.severity.ERROR] = '󰅚 ',
@@ -1019,6 +1031,9 @@ require('lazy').setup({
       --  - yinq - [Y]ank [I]nside [N]ext [Q]uote
       --  - ci'  - [C]hange [I]nside [']quote
       require('mini.ai').setup { n_lines = 500 }
+
+      require('mini.icons').setup()
+      MiniIcons.mock_nvim_web_devicons()
 
       -- Add/delete/replace surroundings (brackets, quotes, etc.)
       --
