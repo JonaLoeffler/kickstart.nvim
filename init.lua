@@ -190,13 +190,13 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 
 vim.keymap.set('n', '<leader>co', ':copen<CR>')
 vim.keymap.set('n', '<leader>cc', ':cclose<CR>')
-vim.keymap.set('n', '<C-n>', ':cnext<CR>')
-vim.keymap.set('n', '<C-p>', ':cprev<CR>')
+vim.keymap.set('n', '<C-j>', ':cnext<CR>')
+vim.keymap.set('n', '<C-k>', ':cprev<CR>')
 
 vim.keymap.set('n', '<leader>qo', ':lopen<CR>')
 vim.keymap.set('n', '<leader>qq', ':lclose<CR>')
-vim.keymap.set('n', '<leader>j', ':lnext<CR>')
-vim.keymap.set('n', '<leader>k', ':lprev<CR>')
+vim.keymap.set('n', '<C-n>', ':lnext<CR>')
+vim.keymap.set('n', '<C-p>', ':lprev<CR>')
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -213,13 +213,13 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
 -- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
+--  Use <leader><hjkl> to switch between windows
 --
 --  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+vim.keymap.set('n', '<leader>h', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+vim.keymap.set('n', '<leader>l', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+vim.keymap.set('n', '<leader>j', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+vim.keymap.set('n', '<leader>k', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 vim.keymap.set('', 'gh', '^', { desc = 'Move to the first non-blank character of the line' })
 vim.keymap.set('', 'gl', '$', { desc = 'Move to the last non-blank character of the line' })
@@ -372,7 +372,7 @@ require('lazy').setup({
       spec = {
         { '<leader>s', group = '[S]earch' },
         { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>g', group = '[G]it', mode = { 'n', 'v' } },
       },
     },
   },
