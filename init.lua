@@ -1095,6 +1095,7 @@ require('lazy').setup({
     opts = {
       ensure_installed = {
         'bash',
+        'regex',
         'c',
         'diff',
         'html',
@@ -1105,6 +1106,7 @@ require('lazy').setup({
         'query',
         'vim',
         'vimdoc',
+        'javascript',
         'typescript',
         'vue',
         'kotlin',
