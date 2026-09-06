@@ -40,14 +40,11 @@ local M = {}
 -- ============================================================================
 -- CONFIGURATION - Update this with your email
 -- ============================================================================
-local JIRA_EMAIL = os.getenv('JIRA_EMAIL')
+local JIRA_EMAIL = os.getenv 'JIRA_EMAIL'
 
 -- Function to fetch Jira tickets
 local function fetch_jira_tickets()
-  local jql = string.format(
-    'assignee = "%s" AND statusCategory != Done AND status != Rejected AND issuetype != Epic ORDER BY updated DESC',
-    JIRA_EMAIL
-  )
+  local jql = string.format('assignee = "%s" AND statusCategory != Done AND status != Rejected AND issuetype != Epic ORDER BY updated DESC', JIRA_EMAIL)
   local cmd = string.format('acli jira workitem search --jql %q --fields "key,summary" --csv', jql)
 
   local handle = io.popen(cmd)
@@ -107,12 +104,16 @@ local function build_branch_name(ticket_key, branch_description, ticket_summary)
 end
 
 local function get_repo_root()
-  local handle = io.popen('git rev-parse --path-format=absolute --git-common-dir 2>/dev/null')
-  if not handle then return nil end
+  local handle = io.popen 'git rev-parse --path-format=absolute --git-common-dir 2>/dev/null'
+  if not handle then
+    return nil
+  end
   local git_dir = handle:read '*l'
   handle:close()
-  if not git_dir or git_dir == '' then return nil end
-  return git_dir:match('^(.+)/.git$')
+  if not git_dir or git_dir == '' then
+    return nil
+  end
+  return git_dir:match '^(.+)/.git$'
 end
 
 local function create_git_branch(ticket_key, branch_description, ticket_summary)
@@ -161,7 +162,7 @@ local function create_git_worktree(ticket_key, branch_description, ticket_summar
   end
 
   local branch_name = build_branch_name(ticket_key, branch_description, ticket_summary)
-  local dir_name = branch_name:match('^feature/(.+)$') or branch_name
+  local dir_name = branch_name:match '^feature/(.+)$' or branch_name
   local worktree_path = git_root .. '/worktrees/' .. dir_name
 
   local cmd = string.format('git worktree add "%s" -b %s 2>&1', worktree_path, branch_name)
@@ -180,7 +181,7 @@ local function create_git_worktree(ticket_key, branch_description, ticket_summar
 
   if success and not error_message then
     local dev_output = vim.fn.system(string.format('dev "%s"', worktree_path))
-    local session = vim.trim(dev_output:match('^([^\n]+)') or '')
+    local session = vim.trim(dev_output:match '^([^\n]+)' or '')
     vim.notify('Worktree ready. Switch to tmux session: ' .. session, vim.log.levels.INFO)
   else
     local error_msg = 'Failed to create worktree'
@@ -242,13 +243,19 @@ function M.create_branch_from_jira()
             prompt = 'Enter branch description (empty to use ticket summary): ',
             default = '',
           }, function(branch_description)
-            if branch_description == nil then return end
+            if branch_description == nil then
+              return
+            end
 
             vim.ui.select(
-              vim.tbl_map(function(a) return a.label end, branch_actions),
+              vim.tbl_map(function(a)
+                return a.label
+              end, branch_actions),
               { prompt = 'Select action:' },
               function(choice)
-                if not choice then return end
+                if not choice then
+                  return
+                end
                 for _, a in ipairs(branch_actions) do
                   if a.label == choice then
                     a.fn(ticket_key, branch_description, ticket_summary)
