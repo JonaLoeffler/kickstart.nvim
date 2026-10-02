@@ -42,45 +42,92 @@ local M = {}
 -- ============================================================================
 local JIRA_EMAIL = os.getenv 'JIRA_EMAIL'
 
--- Function to fetch Jira tickets
-local function fetch_jira_tickets()
+local spinner_frames = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' }
+
+local function start_spinner(label)
+  local frame = 1
+  local timer = vim.uv.new_timer()
+  timer:start(
+    0,
+    100,
+    vim.schedule_wrap(function()
+      vim.api.nvim_echo({ { spinner_frames[frame] .. ' ' .. label, 'Comment' } }, false, {})
+      frame = (frame % #spinner_frames) + 1
+    end)
+  )
+  return timer
+end
+
+local function stop_spinner(timer)
+  if timer and not timer:is_closing() then
+    timer:stop()
+    timer:close()
+  end
+  vim.api.nvim_echo({ { '' } }, false, {})
+end
+
+-- Runs cmd asynchronously, calls on_done(output_string | nil) on the main thread
+local function run_async(cmd, on_done)
+  local chunks = {}
+  vim.fn.jobstart(cmd, {
+    stdout_buffered = false,
+    on_stdout = function(_, data)
+      for _, chunk in ipairs(data) do
+        if chunk ~= '' then
+          table.insert(chunks, chunk)
+        end
+      end
+    end,
+    on_exit = function(_, code)
+      local result = table.concat(chunks, '\n')
+      on_done(code == 0 and result or nil)
+    end,
+  })
+end
+
+-- Function to fetch Jira tickets (async, calls on_done with ticket list or nil)
+local function fetch_jira_tickets(on_done)
   local jql = string.format('assignee = "%s" AND statusCategory != Done AND status != Rejected AND issuetype != Epic ORDER BY updated DESC', JIRA_EMAIL)
   local cmd = string.format('acli jira workitem search --jql %q --fields "key,summary" --csv', jql)
 
-  local handle = io.popen(cmd)
-  if not handle then
-    vim.notify('Failed to run Jira command', vim.log.levels.ERROR)
-    return nil
-  end
+  local timer = start_spinner 'Fetching Jira tickets…'
 
-  local result = handle:read '*a'
-  handle:close()
+  run_async(cmd, function(result)
+    stop_spinner(timer)
 
-  if not result or result == '' then
-    vim.notify('No Jira tickets found', vim.log.levels.WARN)
-    return nil
-  end
+    if not result or result == '' then
+      vim.notify('No Jira tickets found', vim.log.levels.WARN)
+      on_done(nil)
+      return
+    end
 
-  -- Parse CSV output (skip header row): KEY,SUMMARY
-  local tickets = {}
-  local first = true
-  for line in result:gmatch '[^\r\n]+' do
-    if first then
-      first = false
-    else
-      local key, summary = line:match '^([A-Z]+-[0-9]+),(.+)$'
-      if key and summary then
-        summary = summary:match '^"(.*)"$' or summary
-        table.insert(tickets, {
-          key = key,
-          summary = summary,
-          display = key .. ': ' .. summary,
-        })
+    -- Parse CSV output (skip header row): KEY,SUMMARY
+    local tickets = {}
+    local first = true
+    for line in result:gmatch '[^\r\n]+' do
+      if first then
+        first = false
+      else
+        local key, summary = line:match '^([A-Z]+-[0-9]+),(.+)$'
+        if key and summary then
+          summary = summary:match '^"(.*)"$' or summary
+          table.insert(tickets, {
+            key = key,
+            summary = summary,
+            display = key .. ': ' .. summary,
+          })
+        end
       end
     end
-  end
 
-  return tickets
+    if #tickets == 0 then
+      vim.notify('No Jira tickets found', vim.log.levels.WARN)
+      on_done(nil)
+      return
+    end
+
+    on_done(tickets)
+  end)
 end
 
 -- Function to slugify a string (lowercase, replace spaces with hyphens, remove special chars)
@@ -201,75 +248,76 @@ local branch_actions = {
 }
 
 function M.create_branch_from_jira()
-  local tickets = fetch_jira_tickets()
-  if not tickets or #tickets == 0 then
-    return
-  end
+  fetch_jira_tickets(function(tickets)
+    if not tickets then
+      return
+    end
 
-  local pickers = require 'telescope.pickers'
-  local finders = require 'telescope.finders'
-  local actions = require 'telescope.actions'
-  local action_state = require 'telescope.actions.state'
-  local conf = require('telescope.config').values
+    local pickers = require 'telescope.pickers'
+    local finders = require 'telescope.finders'
+    local actions = require 'telescope.actions'
+    local action_state = require 'telescope.actions.state'
+    local conf = require('telescope.config').values
 
-  pickers
-    .new({}, {
-      prompt_title = 'Select Jira Ticket',
-      finder = finders.new_table {
-        results = tickets,
-        entry_maker = function(entry)
-          return {
-            value = entry.key,
-            display = entry.display,
-            ordinal = entry.display,
-            ticket = entry,
-          }
-        end,
-      },
-      sorter = conf.generic_sorter {},
-      attach_mappings = function(prompt_bufnr, map)
-        actions.select_default:replace(function()
-          local selection = action_state.get_selected_entry()
-          actions.close(prompt_bufnr)
+    pickers
+      .new({}, {
+        prompt_title = 'Select Jira Ticket',
+        finder = finders.new_table {
+          results = tickets,
+          entry_maker = function(entry)
+            return {
+              value = entry.key,
+              display = entry.display,
+              ordinal = entry.display,
+              ticket = entry,
+            }
+          end,
+        },
+        sorter = conf.generic_sorter {},
+        attach_mappings = function(prompt_bufnr, _)
+          actions.select_default:replace(function()
+            local selection = action_state.get_selected_entry()
+            actions.close(prompt_bufnr)
 
-          if not selection then
-            return
-          end
-
-          local ticket_key = selection.value
-          local ticket_summary = selection.ticket.summary
-
-          vim.ui.input({
-            prompt = 'Enter branch description (empty to use ticket summary): ',
-            default = '',
-          }, function(branch_description)
-            if branch_description == nil then
+            if not selection then
               return
             end
 
-            vim.ui.select(
-              vim.tbl_map(function(a)
-                return a.label
-              end, branch_actions),
-              { prompt = 'Select action:' },
-              function(choice)
-                if not choice then
-                  return
-                end
-                for _, a in ipairs(branch_actions) do
-                  if a.label == choice then
-                    a.fn(ticket_key, branch_description, ticket_summary)
+            local ticket_key = selection.value
+            local ticket_summary = selection.ticket.summary
+
+            vim.ui.input({
+              prompt = 'Enter branch description (empty to use ticket summary): ',
+              default = '',
+            }, function(branch_description)
+              if branch_description == nil then
+                return
+              end
+
+              vim.ui.select(
+                vim.tbl_map(function(a)
+                  return a.label
+                end, branch_actions),
+                { prompt = 'Select action:' },
+                function(choice)
+                  if not choice then
                     return
                   end
+                  for _, a in ipairs(branch_actions) do
+                    if a.label == choice then
+                      a.fn(ticket_key, branch_description, ticket_summary)
+                      return
+                    end
+                  end
                 end
-              end
-            )
+              )
+            end)
           end)
-        end)
-        return true
-      end,
-    })
-    :find()
+          return true
+        end,
+      })
+      :find()
+  end)
 end
 
 -- Store module in package.loaded so it can be required
