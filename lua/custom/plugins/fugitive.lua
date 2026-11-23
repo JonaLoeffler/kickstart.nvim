@@ -45,6 +45,9 @@ return {
           if vim.bo.buftype == 'terminal' and vim.fn.FugitiveGitDir() ~= '' then
             return
           end
+          if vim.bo.filetype == 'gitcommit' then
+            return
+          end
           if vim.api.nvim_win_is_valid(window) and vim.api.nvim_get_current_win() ~= window then
             vim.api.nvim_win_close(window, true)
           end
@@ -85,11 +88,50 @@ return {
       end,
     })
 
+    vim.api.nvim_create_autocmd('User', {
+      group = group,
+      pattern = 'FugitiveEditor',
+      callback = function()
+        if vim.bo.filetype ~= 'gitcommit' then
+          return
+        end
+        local editor_window = vim.api.nvim_get_current_win()
+        local editor_buffer = vim.api.nvim_get_current_buf()
+        for _, window in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+          local status_buffer = vim.api.nvim_win_get_buf(window)
+          if vim.bo[status_buffer].filetype == 'fugitive'
+            and vim.api.nvim_win_get_config(window).relative ~= '' then
+            -- Keep status alive while the commit message occupies its float.
+            vim.bo[status_buffer].bufhidden = 'hide'
+            vim.api.nvim_win_set_buf(window, editor_buffer)
+            vim.api.nvim_set_current_win(window)
+            vim.api.nvim_win_close(editor_window, true)
+            vim.api.nvim_create_autocmd('WinClosed', {
+              group = group,
+              pattern = tostring(window),
+              once = true,
+              callback = function()
+                vim.schedule(function()
+                  if vim.api.nvim_buf_is_valid(status_buffer) then
+                    vim.api.nvim_open_win(status_buffer, true, float_config())
+                    vim.bo[status_buffer].bufhidden = 'delete'
+                    vim.cmd 'Git'
+                  end
+                end)
+              end,
+            })
+            break
+          end
+        end
+      end,
+    })
+
     vim.api.nvim_create_autocmd('VimResized', {
       group = group,
       callback = function()
         for _, window in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-          if vim.bo[vim.api.nvim_win_get_buf(window)].filetype == 'fugitive'
+          local filetype = vim.bo[vim.api.nvim_win_get_buf(window)].filetype
+          if (filetype == 'fugitive' or filetype == 'gitcommit')
             and vim.api.nvim_win_get_config(window).relative ~= '' then
             vim.api.nvim_win_set_config(window, float_config())
           end
